@@ -1,48 +1,131 @@
-# Project Template (GitHub Pages)
+# From XML to Entities
 
-A tiny static website for a course project. No build step, no server, nothing to
-keep paying for. It is just a few files that GitHub Pages serves as a web page,
-which is why it will still work years from now.
+## Exploring Named Entity Recognition on *Repertorium Germanicum I*
 
-## What's here
+This Digital Philology project explores how three pretrained named entity
+recognition (NER) models respond to the Latin regesta of
+*Repertorium Germanicum I* (RG I).
 
-- `index.html` - the page itself. Edit the text here.
-- `style.css` - the look. Change one color near the top to re-skin it.
-- `figure.png` - your main figure. Replace this file with your own.
-- `data.csv` - your data, in an open and machine-readable format.
-- `LICENSE` - the terms others may reuse your work under (CC BY 4.0).
-- `.nojekyll` - tells GitHub to serve the files exactly as they are.
+**Live project website:**  
+https://yiyang26.github.io/RG1-NER-exploration/
 
-## Put it online with GitHub Pages
+## Research Question
 
-1. Make a free account at github.com.
-2. Make a new **public** repository. Any name works. For a personal site the
-   simplest name is `YOUR-USERNAME.github.io`.
-3. Add these files to it. The no-terminal way: on the repository page choose
-   **Add file -> Upload files**, drag everything in, and **Commit**. The git way:
-   `git clone` the repository, copy the files in, then `git add .`,
-   `git commit -m "first version"`, `git push`.
-4. In the repository open **Settings -> Pages**. Under **Build and deployment**
-   set **Source** to **Deploy from a branch**, choose the **main** branch and the
-   **/ (root)** folder, and click **Save**.
-5. Wait a minute, then visit `https://YOUR-USERNAME.github.io/REPO-NAME/`.
+How do NER models trained in different linguistic and historical contexts
+respond to the abbreviations, historical names, editorial structure, and
+compressed language of RG I?
 
-Every time you push a change, the live site updates on its own.
+The project compares model outputs rather than accuracy. RG I has no
+gold-standard NER annotations, so precision, recall, and F1 cannot be
+calculated reliably.
 
-## Make it yours
+## Corpus
 
-- Edit the title, your name, the abstract, and the table in `index.html`.
-- Drop in your own `figure.png` and `data.csv`.
-- Rewrite this README to say what your project is and how to rebuild it.
-- Change the accent color at the top of `style.css`.
+The [Repertorium Germanicum Online](https://rg-online.dhi-roma.it/denqRG/index.htm),
+produced by the German Historical Institute in Rome, records people, churches,
+places, and legal or ecclesiastical actions found in Vatican registers and
+cameral sources.
 
-## Going further
+RG contains regesta rather than complete document transcriptions. These are
+concise scholarly summaries containing dense historical information and
+frequent abbreviations.
 
-This page is fully static: the data are typed straight into the HTML. The next
-step, if you want a table that updates whenever you edit a data file, is to load
-`data.csv` or a `data.json` with a few lines of JavaScript. That keeps the data
-separate from the page and still needs no server.
+The XML extraction produced:
 
-## License
+| Unit | Number |
+|---|---:|
+| Lemmas | 3,845 |
+| Head segments | 3,845 |
+| Sublemma segments | 5,589 |
+| Total segments | 9,434 |
 
-Text, images, and data: CC BY 4.0 (reuse with credit). See `LICENSE`.
+Abbreviations occur in 8,288 segments, or 87.9% of the corpus.
+
+## Workflow
+
+The project consists of three stages:
+
+1. Parse the RG I XML and extract heads, sublemmata, abbreviations, dates, and source references.
+2. Prepare the texts and apply three pretrained NER models to all 9,434 segments.
+3. Compare model outputs and examine selected cases qualitatively.
+
+Structured source references were removed from the NER input. Original spelling,
+punctuation, dates, and abbreviations were preserved.
+
+## NER Models
+
+### LatinCy
+
+[`latincy/la_core_web_lg`](https://huggingface.co/latincy/la_core_web_lg)
+is a general-purpose Latin spaCy pipeline used as the Latin-specific baseline.
+
+Labels in this project: `PERSON`, `LOC`, `NORP`.
+
+### Multilingual Medieval RoBERTa
+
+[`magistermilitum/roberta-multilingual-medieval-ner`](https://huggingface.co/magistermilitum/roberta-multilingual-medieval-ner)
+was fine-tuned on approximately 8,000 medieval charter texts in Medieval Latin,
+Old French, and Old Spanish.
+
+Labels in this project: `PERS`, `LOC`.
+
+### Multilingual XLM-R
+
+[`Davlan/xlm-roberta-base-ner-hrl`](https://huggingface.co/Davlan/xlm-roberta-base-ner-hrl)
+was fine-tuned on modern NER datasets in ten high-resource languages, including
+German but not Latin. It serves as a modern multilingual baseline.
+
+Labels in this project: `PER`, `LOC`, `ORG`.
+
+For comparison, `PER` and `PERS` were converted to `PERSON`. Direct comparisons
+focus on `PERSON` and `LOC`, the two categories shared by all three models.
+
+## Main Results
+
+| Model | Segments with entities | Coverage | Entity mentions |
+|---|---:|---:|---:|
+| LatinCy | 7,811 | 82.8% | 17,004 |
+| Medieval RoBERTa | 8,015 | 85.0% | 16,172 |
+| Multilingual XLM-R | 7,843 | 83.1% | 13,049 |
+
+The models have similar segment coverage but differ substantially in entity
+boundaries and label distributions.
+
+Exact PERSON/LOC output overlap was highest between Medieval RoBERTa and
+Multilingual XLM-R:
+
+| Model pair | Exact matches | Jaccard similarity |
+|---|---:|---:|
+| LatinCy × Medieval RoBERTa | 2,670 | 8.8% |
+| LatinCy × Multilingual XLM-R | 2,064 | 7.5% |
+| Medieval RoBERTa × Multilingual XLM-R | 5,232 | 22.3% |
+
+These values measure output similarity, not accuracy.
+
+## Main Observations
+
+- LatinCy frequently fragments multiword names and normalizes original forms,
+  including variation involving I/J and U/V.
+- Multilingual XLM-R often produces coherent multiword name boundaries in the
+  selected cases, despite not being fine-tuned on Latin NER data.
+- A larger number of predicted entities does not necessarily indicate better
+  results.
+- Person and place boundaries are difficult to define in expressions such as
+  *Petri de Leyden*. A flat annotation may treat the complete expression as
+  `PERSON`, while nested annotation could also mark *Leyden* as `LOC`.
+- Processing heads and sublemmata separately preserves the XML structure but
+  removes contextual connections within a lemma.
+
+## Repository Structure
+
+```text
+RG1-NER-exploration/
+├── notebooks/
+│   ├── 01_parse_xml.ipynb
+│   ├── 02_data_explore_and_ner.ipynb
+│   └── 03_model_comparison.ipynb
+├── figures/
+├── index.html
+├── style.css
+├── LICENSE
+└── README.md

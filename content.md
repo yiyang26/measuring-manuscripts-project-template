@@ -18,7 +18,15 @@ Basic descriptive data and data exploration
 
 ## NER Experiments
 
-What entities I choose to compare and why
+Three models are selected to represent 3 different training contexts: general Latin NER, medieval documentary languages, and modern multilingual NER
+
+1. LatinCy: 这个是最常用的based on spaCy的拉丁语模型。可以用于做NER任务，识别出来的命名体包括：人名，地名，机构名
+
+2. Multilingual Medieval RoBERTa：这个模型在大约8，000条medieval chaterts written in medieval Latin, Old French, and Old Spanish上fine-tuned过。在时间和领域上都更接近RG1
+
+3. XLM-RoBERTa: 这是一个用现代多语言fined-tuned过的模型，优势在于，RG1里可能存在很多德国人名，城市名，这种情况下，经过多语言训练的模型可能更加robust
+
+
 
 ## Model Performance
 

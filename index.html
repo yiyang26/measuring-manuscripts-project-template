@@ -113,42 +113,639 @@
     consistent tabular dataset that could be processed by all three models.
   </p>
 </section>
-  
+
+<!-- ===== NER MODELS ===== -->
+<section id="ner-models">
+  <h2>NER Models</h2>
+
+  <p>
+    Three pretrained models were selected to represent three different training
+    contexts: a general Latin NLP pipeline, a model trained on medieval
+    documentary languages, and a modern multilingual NER model. None of the
+    models was further trained or fine-tuned on RG I.
+  </p>
+
+  <div class="model-grid">
+
+    <!-- Model 1 -->
+    <article class="model-card">
+      <h3>LatinCy</h3>
+      <p class="model-role">General Latin baseline</p>
+
+      <p>
+        LatinCy is a general-purpose Latin NLP pipeline based on spaCy. It was
+        selected as the Latin-specific baseline because it is designed to
+        process Latin texts and includes a named entity recognition component.
+      </p>
+
+      <p>
+        <strong>Labels:</strong>
+        <code>PERSON</code>,
+        <code>LOC</code>,
+        <code>NORP</code>
+      </p>
+
+      <a
+        class="model-link"
+        href="https://huggingface.co/latincy/la_core_web_lg"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View model card
+      </a>
+    </article>
 
 
-  <!-- ===== DATA: edit the rows, or replace the whole table ===== -->
-  <section>
-    <h2>The numbers</h2>
-    <p>The full data is in <a href="data.csv">data.csv</a>.</p>
-    <table>
+    <!-- Model 2 -->
+    <article class="model-card">
+      <h3>Multilingual Medieval RoBERTa</h3>
+      <p class="model-role">Medieval documentary model</p>
+
+      <p>
+        This XLM-RoBERTa model was fine-tuned on approximately 8,000 annotated
+        medieval charter texts written in Medieval Latin, Old French, and Old
+        Spanish, dating from the eleventh to the fifteenth centuries. Its
+        chronological and documentary training context is therefore the closest
+        to RG I.
+      </p>
+
+      <p>
+        <strong>Labels:</strong>
+        <code>PERS</code>,
+        <code>LOC</code>
+      </p>
+
+      <a
+        class="model-link"
+        href="https://huggingface.co/magistermilitum/roberta-multilingual-medieval-ner"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View model card
+      </a>
+    </article>
+
+
+    <!-- Model 3 -->
+    <article class="model-card">
+      <h3>Multilingual XLM-R</h3>
+      <p class="model-role">Modern multilingual baseline</p>
+
+      <p>
+        This XLM-RoBERTa model was fine-tuned for NER in ten modern
+        high-resource languages, including German but not Latin. It was selected
+        to test whether multilingual training, particularly exposure to German,
+        helps recognize Germanic personal and place names occurring in
+        Latinized historical texts.
+      </p>
+
+      <p>
+        <strong>Labels:</strong>
+        <code>PER</code>,
+        <code>LOC</code>,
+        <code>ORG</code>
+      </p>
+
+      <a
+        class="model-link"
+        href="https://huggingface.co/Davlan/xlm-roberta-base-ner-hrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View model card
+      </a>
+    </article>
+
+  </div>
+
+
+<div class="entity-labels">
+  <h3>Entity Labels</h3>
+
+  <p>
+    The three models use slightly different names for their entity categories.
+    LatinCy uses <code>PERSON</code>, Medieval RoBERTa uses
+    <code>PERS</code>, and Multilingual XLM-R uses <code>PER</code>.
+    For the comparison, <code>PERS</code> and <code>PER</code> were converted
+    to <code>PERSON</code>.
+  </p>
+
+  <p>
+    The quantitative comparison focuses on <code>PERSON</code> and
+    <code>LOC</code>, since these are the only two categories shared by all
+    three models. The model-specific categories <code>NORP</code> and
+    <code>ORG</code> were kept in the complete results but were not included
+    in the exact-overlap comparison.
+  </p>
+</div>
+
+
+<!-- ===== MODEL OUTPUT COMPARISON ===== -->
+<section id="model-comparison">
+  <h2>Model Output Comparison</h2>
+
+  <p>
+    All three models were applied to the same 9,434 text segments. Since RG I
+    has no gold-standard NER annotations, the following results describe
+    differences and similarities in model output rather than model accuracy.
+    Only <code>PERSON</code> and <code>LOC</code>, the two labels shared by all
+    three models, are included in the direct comparison.
+  </p>
+
+
+  <!-- ===== RESULT 1 ===== -->
+  <h3>Unique Entity Surface Forms</h3>
+
+  <p>
+    The first comparison counts how many different PERSON and LOC strings were
+    identified by each model.
+  </p>
+
+  <div class="table-wrapper">
+    <table class="result-table">
+      <caption>
+        Unique PERSON and LOC surface forms identified by each model
+      </caption>
+
       <thead>
-        <tr><th>Item</th><th>Measure</th><th>Value</th></tr>
+        <tr>
+          <th scope="col">Model</th>
+          <th scope="col" class="numeric">Unique forms</th>
+          <th scope="col">Relative number</th>
+        </tr>
       </thead>
+
       <tbody>
-        <tr><td>Example A</td><td>count</td><td>42</td></tr>
-        <tr><td>Example B</td><td>count</td><td>17</td></tr>
-        <tr><td>Example C</td><td>count</td><td>8</td></tr>
+        <tr>
+          <th scope="row">LatinCy</th>
+          <td class="numeric">4,281</td>
+          <td>
+            <div
+              class="table-bar"
+              role="img"
+              aria-label="LatinCy: 4,281 unique forms"
+            >
+              <span
+                class="table-bar-fill"
+                style="--bar-width: 56.3%;"
+              ></span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row">Medieval RoBERTa</th>
+          <td class="numeric">7,602</td>
+          <td>
+            <div
+              class="table-bar"
+              role="img"
+              aria-label="Medieval RoBERTa: 7,602 unique forms"
+            >
+              <span
+                class="table-bar-fill"
+                style="--bar-width: 100%;"
+              ></span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row">Multilingual XLM-R</th>
+          <td class="numeric">7,301</td>
+          <td>
+            <div
+              class="table-bar"
+              role="img"
+              aria-label="Multilingual XLM-R: 7,301 unique forms"
+            >
+              <span
+                class="table-bar-fill"
+                style="--bar-width: 96%;"
+              ></span>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
-  </section>
+  </div>
 
-  <!-- ===== METHOD: enough that a stranger could rebuild the result ===== -->
-  <section>
-    <h2>How it was made</h2>
-    <p>
-      One short paragraph. Where the data came from, what produced the figure, and
-      how someone could rebuild it. The full detail lives in the
-      <a href="README.md">README</a>.
-    </p>
-  </section>
+  <p class="result-interpretation">
+    Medieval RoBERTa produced the largest number of unique entity strings,
+    followed closely by Multilingual XLM-R. LatinCy produced substantially
+    fewer unique forms. This may reflect differences in entity boundaries and
+    name segmentation, but it does not indicate which model is more accurate.
+  </p>
 
-  <!-- ===== FOOTER: license and a link back to the source ===== -->
-  <footer>
-    <p>
-      Text, images, and data: CC BY 4.0. Reuse freely with credit.
-      Source: <a href="https://github.com/christiancasey/measuring-manuscripts-project-template">this repository</a>.
+  <p class="method-note">
+    These figures represent unique surface forms, not uniquely identified
+    historical people or places. For example, <em>Johannes</em>,
+    <em>Iohannes</em>, and <em>Johannes de Leone</em> are counted as different
+    strings.
+  </p>
+
+
+  <!-- ===== RESULT 2 ===== -->
+  <h3>Exact Agreement Between Models</h3>
+
+  <p>
+    Two predictions were counted as an exact match only when they occurred in
+    the same segment and had identical character boundaries and entity labels.
+    The Jaccard percentage compares the exact matches with the combined set of
+    predictions produced by each pair of models.
+  </p>
+
+  <div class="table-wrapper">
+    <table class="result-table">
+      <caption>
+        Pairwise exact agreement for PERSON and LOC predictions
+      </caption>
+
+      <thead>
+        <tr>
+          <th scope="col">Model pair</th>
+          <th scope="col" class="numeric">Exact matches</th>
+          <th scope="col" class="numeric">Jaccard</th>
+          <th scope="col">Relative overlap</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <th scope="row">
+            LatinCy × Medieval RoBERTa
+          </th>
+          <td class="numeric">2,670</td>
+          <td class="numeric">8.8%</td>
+          <td>
+            <div
+              class="table-bar"
+              role="img"
+              aria-label="8.8 percent exact overlap"
+            >
+              <span
+                class="table-bar-fill table-bar-fill-secondary"
+                style="--bar-width: 35.2%;"
+              ></span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row">
+            LatinCy × Multilingual XLM-R
+          </th>
+          <td class="numeric">2,064</td>
+          <td class="numeric">7.5%</td>
+          <td>
+            <div
+              class="table-bar"
+              role="img"
+              aria-label="7.5 percent exact overlap"
+            >
+              <span
+                class="table-bar-fill table-bar-fill-secondary"
+                style="--bar-width: 30%;"
+              ></span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row">
+            Medieval RoBERTa × Multilingual XLM-R
+          </th>
+          <td class="numeric">5,232</td>
+          <td class="numeric">22.3%</td>
+          <td>
+            <div
+              class="table-bar"
+              role="img"
+              aria-label="22.3 percent exact overlap"
+            >
+              <span
+                class="table-bar-fill table-bar-fill-secondary"
+                style="--bar-width: 89.2%;"
+              ></span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="result-interpretation">
+    Medieval RoBERTa and Multilingual XLM-R showed the highest exact agreement,
+    with 5,232 shared predictions and a Jaccard similarity of 22.3%. LatinCy
+    showed considerably lower exact agreement with both Transformer models.
+  </p>
+
+  <p class="method-note">
+    Exact matching is deliberately strict. For example,
+    <em>Johannes</em> and <em>Johannes de Leone</em> are counted as different
+    predictions because their entity boundaries do not match. The percentages
+    therefore measure output similarity rather than accuracy.
+  </p>
+</section>
+
+<!-- ===== QUALITATIVE ERROR ANALYSIS ===== -->
+<section id="error-analysis">
+  <h2>Qualitative Error Analysis</h2>
+
+  <p>
+    Since RG I has no gold-standard NER annotations, the following analysis
+    does not provide a formal evaluation of model errors. Instead, it compares
+    two cases in which the models produce different entity boundaries, labels,
+    and surface forms. The XML structure and the surrounding Latin context are
+    used to interpret these differences.
+  </p>
+
+
+  <!-- ===== CASE 1 ===== -->
+  <article class="analysis-case">
+    <header class="case-header">
+      <p class="case-number">Case 1 · Abbreviated and Variant Name</p>
+      <h3>Johannes de Kingstein / Joh. de Kunigstein</h3>
+    </header>
+
+    <div class="lemma-context">
+      <p>
+        <strong>Lemma head:</strong>
+        Johannes de Kingstein rector par. eccl. de Brengarten Constant. dioc.
+      </p>
+
+      <p>
+        <strong>Sublemma processed by the models:</strong>
+        cf. Joh. de Kunigstein.
+      </p>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="case-table">
+        <thead>
+          <tr>
+            <th scope="col">Model</th>
+            <th scope="col">Predicted entities</th>
+            <th scope="col">Observation</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <th scope="row">LatinCy</th>
+            <td>
+              <span class="entity person">Ioh</span>
+              <code>PERSON</code>
+            </td>
+            <td>
+              Identifies only the abbreviated given name and changes
+              <em>Joh.</em> to the normalized form <em>Ioh</em>.
+            </td>
+          </tr>
+
+          <tr>
+            <th scope="row">Medieval RoBERTa</th>
+            <td>
+              <span class="entity person">Joh. de</span>
+              <code>PERSON</code>;
+              <span class="entity person">Kunigstein.</span>
+              <code>PERSON</code>
+            </td>
+            <td>
+              Detects the complete expression but separates it into two person
+              entities.
+            </td>
+          </tr>
+
+          <tr>
+            <th scope="row">Multilingual XLM-R</th>
+            <td>
+              <span class="entity person">Joh. de Kunigstein.</span>
+              <code>PERSON</code>
+            </td>
+            <td>
+              Treats the complete multiword name as a single person entity.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="case-observation">
+      The lemma head provides the fuller form
+      <em>Johannes de Kingstein</em>, while the sublemma contains the
+      abbreviated and orthographically different form
+      <em>Joh. de Kunigstein</em>. All three models react to the personal name,
+      but only XLM-R produces a single entity boundary covering the complete
+      expression. The case also demonstrates a limitation of segment-level
+      processing: none of the models can access the fuller name contained in
+      the lemma head.
     </p>
-  </footer>
+  </article>
+
+
+  <!-- ===== CASE 2 ===== -->
+  <article class="analysis-case">
+    <header class="case-header">
+      <p class="case-number">Case 2 · Person and Place Boundaries</p>
+      <h3>Petri de Leyden</h3>
+    </header>
+
+    <p class="case-text">
+      Jacobus filius quondam Petri de Leyden presb. Traiect. dioc. perp.
+      vicarius eccl. s. Petri Middelburgen. Traiect. dioc.
+    </p>
+
+    <div class="table-wrapper">
+      <table class="case-table">
+        <thead>
+          <tr>
+            <th scope="col">Model</th>
+            <th scope="col">Predicted entities</th>
+            <th scope="col">Observation</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <th scope="row">LatinCy</th>
+            <td>
+              <span class="entity person">Iacobus</span>
+              <code>PERSON</code>;
+              <span class="entity person">Petri</span>
+              <code>PERSON</code>;
+              <span class="entity person">Leyden</span>
+              <code>PERSON</code>;
+              <span class="entity person">Traiect</span>
+              <code>PERSON</code>;
+              <span class="entity person">Petri</span>
+              <code>PERSON</code>;
+              <span class="entity location">Middelburgen</span>
+              <code>LOC</code>;
+              <span class="entity person">Traiect</span>
+              <code>PERSON</code>
+            </td>
+            <td>
+              Finds the largest number of entity components, but fragments
+              personal names and labels both occurrences of
+              <em>Traiect.</em> as persons.
+            </td>
+          </tr>
+
+          <tr>
+            <th scope="row">Medieval RoBERTa</th>
+            <td>
+              <span class="entity person">Jacobus</span>
+              <code>PERSON</code>;
+              <span class="entity person">Petri de</span>
+              <code>PERSON</code>;
+              <span class="entity person">Leyden</span>
+              <code>PERSON</code>;
+              <span class="entity person">Petri Middelburgen.</span>
+              <code>PERSON</code>
+            </td>
+            <td>
+              Separates <em>Petri de Leyden</em> and merges the saint’s name
+              with the following geographical expression.
+            </td>
+          </tr>
+
+          <tr>
+            <th scope="row">Multilingual XLM-R</th>
+            <td>
+              <span class="entity person">Jacobus</span>
+              <code>PERSON</code>;
+              <span class="entity person">Petri de Leyden</span>
+              <code>PERSON</code>;
+              <span class="entity person">Petri Middelburgen.</span>
+              <code>PERSON</code>
+            </td>
+            <td>
+              Produces the most coherent boundary for
+              <em>Petri de Leyden</em>, but merges
+              <em>Petri</em> and <em>Middelburgen.</em> and misses both
+              occurrences of <em>Traiect.</em>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="case-observation">
+      Context suggests that <em>Petri de Leyden</em> is the name of Jacobus’s
+      father, while <em>Leyden</em> is also a place-derived element within that
+      name. Later in the text, <em>Petri</em> refers to St Peter in the name of
+      a church, while <em>Middelburgen.</em> and <em>Traiect.</em> provide
+      geographical information. No model captures all of these distinctions.
+    </p>
+  </article>
+
+
+  <!-- ===== MAIN FINDINGS ===== -->
+  <div class="analysis-findings">
+    <h3>Main Findings</h3>
+
+    <ol>
+      <li>
+        <strong>LatinCy changes some original forms.</strong>
+        LatinCy normalizes orthographic variation involving I/J and U/V, for
+        example <em>Jacobus → Iacobus</em> and
+        <em>Joh. → Ioh</em>. This may be useful for linguistic normalization,
+        but it means that the entity string returned by the model does not
+        always match the original RG I text. It also complicates direct
+        comparison of unique entity strings across models.
+      </li>
+
+      <li>
+        <strong>XLM-R often produces coherent multiword name boundaries.</strong>
+        Although Multilingual XLM-R was not fine-tuned on Latin NER data, it
+        identifies <em>Joh. de Kunigstein</em> and
+        <em>Petri de Leyden</em> as complete person entities in these examples.
+        This suggests that multilingual training may help it recognize common
+        name structures. However, it still misses or merges several
+        ecclesiastical and geographical expressions, so this does not establish
+        that it is the best model overall.
+      </li>
+
+      <li>
+        <strong>More predictions do not necessarily mean better predictions.</strong>
+        LatinCy produces the largest number of entities in the second example,
+        but several are fragmented or assigned questionable labels. Entity
+        counts therefore describe model behaviour, not accuracy.
+      </li>
+
+      <li>
+        <strong>The entity boundaries are themselves difficult to define.</strong>
+        An expression such as <em>Petri de Leyden</em> can be annotated as one
+        complete <code>PERSON</code> entity. A nested annotation scheme could
+        instead treat the full expression as <code>PERSON</code> while also
+        marking <em>Leyden</em> as a <code>LOC</code>. Neither choice is
+        automatically correct without an explicit annotation guideline.
+      </li>
+    </ol>
+  </div>
+
+  <p class="analysis-conclusion">
+    These cases show that the main challenge is not simply whether a model
+    detects an entity. The models also differ in orthographic normalization,
+    entity boundaries, and the interpretation of place names embedded in
+    personal and ecclesiastical expressions. Consequently, the model with the
+    highest number of predictions is not necessarily the model that produces
+    the most useful analysis for historical regesta.
+  </p>
+</section>
+
+<!-- ===== CONCLUSION ===== -->
+<section id="conclusion">
+  <h2>Conclusion</h2>
+
+  <p>
+    This project extracted 9,434 text segments from the RG I XML, applied three
+    pretrained NER models, and compared their entity counts, output agreement,
+    and predictions in selected cases. In the current setup, LatinCy appears to
+    be the least suitable model for this corpus: it frequently fragments
+    multiword names, assigns questionable labels to abbreviated place names,
+    and changes original forms through orthographic normalization.
+  </p>
+
+  <p>
+    The choice between the two Transformer models is less straightforward.
+    Medieval RoBERTa has the closest historical training context, while
+    Multilingual XLM-R often produces more coherent name boundaries despite not
+    being trained on Latin NER data. A more reliable evaluation would require
+    greater familiarity with the editorial conventions of RG I, clearer
+    decisions about person–place boundaries, and a small manually annotated
+    reference sample.
+  </p>
+</section>
+
+
+<footer class="site-footer">
+  <p>
+    © <span id="year"></span> Yiyang Huang ·
+    <a
+      href="https://github.com/yiyang26/RG1-NER-exploration"
+      target="_blank"
+      rel="noopener noreferrer"
+    >Project repository</a>
+  </p>
+
+  <p>
+    Corpus:
+    <a
+      href="https://rg-online.dhi-roma.it/denqRG/index.htm"
+      target="_blank"
+      rel="noopener noreferrer"
+    ><cite>Repertorium Germanicum Online</cite></a>
+    · Website based on the
+    <a
+      href="https://github.com/christiancasey/measuring-manuscripts-project-template"
+      target="_blank"
+      rel="noopener noreferrer"
+    >Measuring Manuscripts project template</a>
+    by Christian Casey.
+  </p>
+</footer>
 
 </main>
 
